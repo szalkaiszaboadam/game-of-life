@@ -1,19 +1,31 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Életjátél</title>
+</head>
+<body>
+
 <div id="lol">
     <span> Pálya mérete: </span>
-    <input id=sizeX type="text"  value="800" />
+    <input id=sizeX type="text"  value="1500" />
     <input id=sizeY type="text"  value="500" />
     <span>Blokkok mérete: </span>
     <input id=blocksize type="text"  value="8" />
     <br>
+    <button type="button" class="button">
     <span id=start>Indítás  </span>
+    </button>
     <span id=pause>Megállítás  </span>
     <span id=rand>Random generálás  </span>
     <span id=clear>Törlés  </span>
     
 </div>
 
-<canvas id="canvasElement" width=800 height=500 style="border:1px solid black"></canvas>
+<canvas id="canvasElement" width=1500 height=750 ></canvas>
 
 <script type="text/javascript" charset="utf-8" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 
@@ -54,5 +66,7 @@
 
 </script>
 
-<script type="text/javascript" charset="utf-8" src="app.js"></script>
+<script type="text/javascript" charset="utf-8" src="eszkozok/app.js"></script>
+
+</body>
 </html>

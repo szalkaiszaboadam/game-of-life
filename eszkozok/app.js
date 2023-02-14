@@ -1,6 +1,6 @@
 var size = 8;
-var sizeX = 800;
-var sizeY = 500;
+var sizeX = 1500;
+var sizeY = 750;
 
 
 sizeX /= size;
@@ -175,7 +175,7 @@ function playGame(){
 }
 
 
-gameInterval = 100;
+gameInterval = 500;
 continueGame = true;
 
 
