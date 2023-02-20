@@ -1,182 +1,242 @@
-var size = 8;
-var sizeX = 1500;
-var sizeY = 750;
+var size = 50;
+var size2 = size
+
+document.getElementById("size").value = size;
+//document.getElementById("size2").value = size;
+resizeGrid(size, size2);
+
+function resizeGrid(cols, rows) {
+    size = cols;
+    size2 = rows;
+    console.log("C: " + String(size));
+    console.log("R: " + String(size2));
+
+    var grid = document.getElementById("grid");
+
+    var cellWidth = 1 / cols * 100;
+    console.log("cellWidth: " + String(cellWidth));
+
+    var cellHeight = 1 / rows * 100;
+    console.log("cellHeight: " + String(cellHeight));
 
 
-sizeX /= size;
-sizeY /= size;
-
-var historyArray = [[]];
-
-var canvas = document.getElementById('canvasElement');
-var ctx = canvas.getContext('2d');
+    while (grid.lastChild) {
+      grid.removeChild(grid.lastChild);
+    }
 
 
-canvas.addEventListener('mousedown', draw, false);
-canvas.addEventListener('mouseup', stopdraw, false);
+    for (var r = 0; r < rows; r++) {
+        var thisRow = document.createElement("div");
+        thisRow.className = "grid-row";
+        thisRow.style.height = String(cellHeight) + "%";
+        grid.appendChild(thisRow);
 
-toKill = [];
-toCreate = [];
+        for (var c = 0; c < cols; c++) {
+            var thisCell = document.createElement("div");
+            thisCell.classList.add("cell");
+            thisCell.id = "r" + String(r) + "-c" + String(c)
+            thisCell.style.width = String(cellWidth) + "%";
+            thisCell.style.height = "100%";
+            thisCell.onclick = function() { this.classList.toggle("alive"); };
+            //thisCell.onclick = function() { getNewStatus(this.id); };
+            thisRow.appendChild(thisCell);
 
-buildArray();
 
-$(document).mousemove(function(e){
-    mouseX = e.pageX - canvas.offsetLeft;
-    mouseY = e.pageY - canvas.offsetTop;
-});
 
-function clear(){
-    for (var i=0; i<sizeX; i++){
-        for (var j=0; j<sizeY; j++){
-            kill(i,j);
         }
+
     }
+
+    //kockasGrid();
+    randomValues();
 }
 
-function resize(newX,newY){
-    sizeX = newX/size;
-    sizeY = newY/size;
+
+
+var isRunning = false; 
+var interval;
+
+function stopEvolving() {
+    clearInterval(interval);
+    var button = document.getElementById("startButton");
+    isRunning = false;
+    button.value = "stopped";
+    button.innerHTML = "Indítás";
+    document.getElementById("speed").disabled = false;
+    document.getElementById("size").disabled = false;
+    document.getElementById("resize").disabled = false;
+    document.getElementById("evolve").disabled = false;
 }
 
-function draw(){
-    console.log('down woooo');
-    x=Math.floor(mouseX/size);
-    y=Math.floor(mouseY/size);
-    if ( historyArray[x][y] ) {
-        shouldcreate = false;
-    }else{
-        shouldcreate = true;
+function toggleEvolve(button) {
+    console.log(button.value);
+
+    if (button.value === "stopped") {
+        isRunning = true;
+        button.value = "running";
+        button.innerHTML = "Megállítás";
+        var slider = document.getElementById("speed");
+        var size = document.getElementById("size");
+        var resize = document.getElementById("resize");
+        var evolve = document.getElementById("evolve");
+
+        var speed = slider.value;
+        /*var sizeSize = size.value;
+        var sizeSize2 = sizeSize;*/
+
+
+        console.log(speed);
+        slider.disabled = true;
+        size.disabled = true;
+        resize.disabled = true;
+        evolve.disabled = true;
+
+        interval = setInterval(function() { updateGrid(); }, speed);
+    } else {
+        stopEvolving();
     }
-    t = setInterval(function(){
+
+}
+
+
+
+function updateGrid() {
+    var allCells = document.getElementsByClassName("cell");
+    var newStatuses = {}
+    for (var i = 0; i < allCells.length; i++) {
+
+        var thisId = allCells[i].id;
+        newStatuses[thisId] = getNewStatus(thisId);
+    }
+    for (var i = 0; i < allCells.length; i++) {
+
+        var thisCell = allCells[i];
+        var willLive = newStatuses[thisCell.id];
+        thisCell.classList.toggle("alive", willLive); 
+    }
+
+}
+
+
+function getNewStatus(cellId) {
+    var pals = countAliveNeighbors(cellId);
+    var cell = getCell(cellId);
+    var isAlive = cell.classList.contains("alive");
+
+    if (isAlive) { 
+        if (pals < 2 || pals > 3) { 
+          
+            isAlive = false; 
+        } else {
+           
+        }
+    } else { 
+        if (pals === 3) {
+           
+            isAlive = true;
+        } else {
         
-        x=Math.floor(mouseX/size);
-        y=Math.floor(mouseY/size);
-        if ( shouldcreate) {
-            create(x,y);
-        }else{
-            kill(x,y);
-        }
-    }, 10);
-}
-
-
-function stopdraw(e){
-    console.log('up woooo');
-    clearInterval(t);
-}
-
-function buildRandomData(length){
-    for (var i=0;i<length;i++){
-        create(Math.floor(Math.random()*sizeX),Math.floor(Math.random()*sizeY))
-    }
-
-}
-
-function on_canvas_click(ev) {
-        var x = ev.clientX - canvas.offsetLeft;
-        var y = ev.clientY - canvas.offsetTop;
-        x /= size
-        y /= size
-        x = Math.floor(x);
-        y = Math.floor(y);
-        console.log(x,y);
-        if (historyArray[x][y]){
-            kill(x,y)
-        }else{
-            create(x,y)
-        }
-}
-
-
-
-
-drawSquareAt = function(x,y){
-    x *= size;
-    y *= size;
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";  
-    ctx.fillRect (x,y,size,size);
-}
-
-killSquareAt = function(x,y){
-    x *= size;
-    y *= size;
-    ctx.fillStyle = "rgba(255, 255, 255, 1)";  
-    ctx.fillRect (x,y,size,size);
-}
-
-function buildArray(){
-    for (var i=0; i<sizeX; i++){
-        historyArray[i]=[];
-        for (var j=0; j<sizeY; j++){
-            historyArray[i][j]=0;
-        }
-    }
-}
-
-kill = function (x,y){
-    historyArray[x][y] = 0;
-    killSquareAt(x,y);
-}
-
-create = function(x,y){
-    historyArray[x][y] = 1;
-    drawSquareAt(x,y);
-}
-
-startGame = function(x,y){
-    for (var i=0; i<sizeX; i++){
-        for (var j=0; j<sizeY; j++){
-            checkNeighbors(i,j);
         }
     }
 
-    for (var i = 0; i<toCreate.length; i++){
-        create(toCreate[i][0],toCreate[i][1])
-    }
-    toCreate=[];
-
-
-    for (var i = 0; i<toKill.length; i++){
-        kill(toKill[i][0],toKill[i][1])
-    }
-    toKill=[];
+    return isAlive;
 }
 
-checkNeighbors = function(x,y){
-    var numbersAround = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
-    var count = 0;
-    for (var i = 0; i < numbersAround.length; i++){
-        xpart=x+numbersAround[i][0];
-        ypart=y+numbersAround[i][1];
-        if ( xpart < 0 || ypart < 0 || xpart >= sizeX || ypart >= sizeY ){
-            continue;
+
+
+
+function countAliveNeighbors(cellId) {
+    var neighborList = findNeighbors(cellId);
+    var liveOnes = 0;
+    neighborList.forEach( function(cellId) {
+        var neighbor = getCell(cellId);
+        if (neighbor === null) {
+            console.Log(cellId);
+            return;
         }
-        count += historyArray[xpart][ypart];
-    }
+        if (neighbor.classList.contains("alive")) {
+            liveOnes += 1;
+        }
+    });
 
-    if ( count < 2 && historyArray[x][y]){
-        toKill.push([x,y]);
-    }
-    if ( count > 3 && historyArray[x][y] ) {
-        toKill.push([x,y]);
-    }
-    if ( count == 3 ){
-        toCreate.push([x,y]);
-    }
-
-    return count;
-}
-
-function playGame(){
-    startGame();
-    if (continueGame){
-        setTimeout(function(){playGame()},gameInterval);
-    }
+    return liveOnes;
 }
 
 
-gameInterval = 500;
-continueGame = true;
+function findNeighbors(cellId) {
+    var coords = parseCellId(cellId);
+    //console.log("coords", coords);
+
+    var deltaList = [   [-1,-1],[-1,0], [-1,1],
+				        [0,-1],         [0,1],
+				        [1,-1], [1,0],  [1,1]
+                    ];
+
+    var neighborList = []; 
+
+    deltaList.forEach( function(dels) {
+
+        var newR = coords[0] + dels[0];
+        var newC = coords[1] + dels[1];
+        if (newR < 0 || newC < 0 || newR >= size || newC >= size2) {
+
+        } else {
+            var newId = getCellId([newR, newC]);
+            neighborList.push(newId);
+        }
+    });
+
+    //console.log(neighborList);
+    return neighborList;
+}
+
+function parseCellId(cellId) {
+    var splitted = cellId.split("-");
+    //console.log(splitted);
+    var thisR = parseInt(splitted[0].slice(1));
+    var thisC = parseInt(splitted[1].slice(1));
+    //console.log("thisR: ", thisR, " thisC: ", thisC);
+    return [thisR, thisC];
+}
 
 
+function getCellId(coordList) {
+    return "r" + String(coordList[0]) + "-c" + String(coordList[1]);
+}
 
+function getCell(cellId) {
+    return document.getElementById(cellId);
+}
+
+function clearGrid() {
+    stopEvolving();
+    var allCells = document.getElementsByClassName("cell");
+    for (var i = 0; i < allCells.length; i++) {
+        allCells[i].classList.remove("alive");
+    }
+}
+
+
+function kockasGrid() {
+    stopEvolving();
+    var allCells = document.getElementsByClassName("cell");
+    for (var i = 0; i < allCells.length; i++) {
+        var thisCell = allCells[i];
+        var coords = parseCellId(thisCell.id);
+        var r = coords[0], c = coords[1];
+        if (r % 2 === 0 && c % 2 === 0 || r % 2 === 1 && c %2 === 1) {
+            thisCell.classList.add("alive");
+        } else {
+            thisCell.classList.remove("alive");
+        }
+    }
+}
+
+function randomValues() {
+    stopEvolving();
+    var allCells = document.getElementsByClassName("cell");
+    for (var i = 0; i < allCells.length; i++) {
+        var randomBool = Math.random() >= 0.5;
+        allCells[i].classList.toggle("alive", randomBool);
+    }
+}

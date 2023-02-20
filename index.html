@@ -1,70 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Életjáték</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+
+
 </head>
 <body>
 
-<div id="lol">
-    <span> Pálya mérete: </span>
-    <input id=sizeX type="text"  value="1500" />
-    <input id=sizeY type="text"  value="500" />
-    <span>Blokkok mérete: </span>
-    <input id=blocksize type="text"  value="8" />
-    <br>
-    <span id=start>Indítás  </span>
-    <span id=pause>Megállítás  </span>
-    <span id=rand>Random generálás  </span>
-    <span id=clear>Törlés  </span>
+<div class="container-fluid">
+<div id="wrapper" class="row">
+
+    <header class="col-md-4">
+
+        <div>
+            <h1>Életjáték</h1>
+            <h3>Nagy Gábor & Szalkai-Szabó Ádám</h3>
+        </div>
+
+        <main class="col-md-8">
+
+            <div id="grid">
     
-</div>
+            </div>
+    
+        </main>
 
-<canvas id="canvasElement" width=1500 height=750 ></canvas>
+        <div id="controls">
+            <form class="row">
+                <div class="col-xs-12">
+                        <div class="slider row">  
+                        <div style="font-family: 'VT323', monospace;
+                        font-weight: 600; color: #363535;">Méret</div>
+                        <div class="col-xs-4">
+                             <input id="size" type="range" name="size" min="5" max="100"/>
+                             <button class="button" type="button" name="resize" id="resize" onclick="resizeGrid(size.value, size.value)">Átméretezés</button>
+                           
 
-<script type="text/javascript" charset="utf-8" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+                           
+                            </div>
 
-<script type="text/javascript" charset="utf-8">
-    $('#sizeX').change(function(){
-        console.log(this);
-        sizeX=$(this).val()/4;
-        $('#canvasElement').attr('width',$(this).val());
-        buildArray();
-    });
-    $('#sizeY').change(function(){
-        sizeY=$(this).val()/4;
-        $('#canvasElement').attr('height',$(this).val());
-        buildArray()
-    });
-    $('#blocksize').change(function(){
-        clear();
-        size = parseInt($(this).val());
-        sizeX = parseInt($('#sizeX').val());
-        sizeY = parseInt($('#sizeY').val());
-        resize(sizeX,sizeY);
-        buildArray();
-    });
-    $('#rand').click(function(){
-       buildRandomData('1000');
-    })
-    $('#start').click(function(){
-       continueGame = true;
-       playGame();
-    })
-    $('#pause').click(function(){
-       continueGame = false;
-    })
+                            <div style="font-family: 'VT323', monospace;
+                            font-weight: 600; color: #363535;" > Sebesség </div>
+                            <div class="col-xs-4">
+                                 <input type="range" name="speed" min="1" max="1000" value="500" id="speed"/>
+                             </div>
+        
+                            </div>
+        
+                    <!--<input id="size" type="number" name="size" min="2" max="100">-->
+                    <!-- <input id="size2" type="number" name="rows" min="2" max="100">-->
+                  
+                </div>
+            </form>
 
-    $('#clear').click(function(){
-       clear(); 
-    });
+            <div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button class="button" type="button" name="start" onclick="toggleEvolve(this)" value="stopped" id="startButton">Indítás</button>
+                        <button class="button" type="button" name="evolve" id="evolve" onclick="updateGrid()">Következő</button>
+                        <button class="button" type="button" name="clear" onclick="clearGrid()">Ürítés</button>
+                    </div>
 
-</script>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button class="button" type="button" name="kockas" onclick="kockasGrid()">Kockás pálya</button>
+                        <button class="button" type="button" name="random" onclick="randomValues()">Random</button>
+                    </div>
+                </div>
+               
 
-<script type="text/javascript" charset="utf-8" src="eszkozok/app.js"></script>
+                  
+
+            </div>
+        </div>
+
+    </header>
+
+</div> <!-- .row -->
+</div> <!-- .container -->
+
+    <script src="app.js"></script>
 
 </body>
+
 </html>
